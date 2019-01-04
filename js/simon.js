@@ -1,5 +1,63 @@
 var KEYS = ['c', 'd', 'e', 'f'];
 var NOTE_DURATION = 1000;
+//var QUEUE = [];
+
+/* var queue = [];
+queue.push(2);         // queue is now [2]
+queue.push(5);         // queue is now [2, 5]
+var i = queue.shift(); // queue is now [5]
+alert(i);  */             // displays 2
+var game = new Game();
+var gameRunning = true;
+game.generateNew();
+
+var notes = {};
+
+KEYS.forEach(function (key) {
+	notes[key] = new NoteBox(key);
+});
+
+function Game() {
+	var level = 1;
+	var playerTurn = false;
+	var queueOfNotes = [];
+	var queueSoFar   = [];
+	
+	
+		
+	this.playNotes = function () {
+		queueOfNotes.forEach(function(key, i) { // KEYS.concat(KEYS.slice().reverse()).forEach(function(key, i)
+			setTimeout(notes[key].play.bind(null, key), i * NOTE_DURATION);
+	});
+			playerTurn = true;
+
+	}
+		
+		
+	
+	
+	this.generateNew = function () {
+		var randomNote = notes[KEYS[Math.floor(Math.random() * 3)]];
+		queueOfNotes.push(randomNote);
+		queueSoFar = queueOfNotes.slice();
+	}
+	
+	this.resetGame = function () {
+		level = 1;
+		playerTurn = false;
+		queueOfNotes = [];
+		queueSoFar   = [];
+		this.generateNew();
+		
+	}
+	
+	
+	this.checkCorrect = function (key) {
+		var correctKey = queueSoFar.shift();
+		return (key==correctKey);
+		
+	}
+}
 
 // NoteBox
 //
@@ -18,6 +76,8 @@ function NoteBox(key, onClick) {
 	// Counter of how many play calls have been made without completing.
 	// Ensures that consequent plays won't prematurely remove the active class.
 	var playing = 0;
+	
+	// var waitVar;
 
 	this.key = key;
 	this.onClick = onClick || function () {};
@@ -55,6 +115,41 @@ function NoteBox(key, onClick) {
 
 		this.onClick(this.key)
 		this.play()
+		
+		if (gameRunning && (game.playerTurn == true)) {
+			var correct = checkCorrect(this.key);
+			if (correct && (queueSoFar.length == 0)) {
+				
+				game.level = game.level + 1;
+				game.playerTurn = false;
+				game.generateNew();
+				//setTimeout(game.playNotes(), NOTE_DURATION);
+				//game.playNotes();
+				game.playerTurn = true;
+			}
+			else if (correct) {
+				// nothing happens
+			}
+			
+			else {
+				game.resetGame();
+				//setTimeout(game.playNotes(), NOTE_DURATION);
+				game.playerTurn = true;
+			}
+			
+		}
+		else {
+			gameRunning = true;
+			
+			//setTimeout(game.resetGame(), NOTE_DURATION);
+		}
+		
+			// QUEUE.push(this.key)
+			//waitVar  = function () {
+			//	setTimeout(this.play, 2500)
+			//}
+			
+		
 	}.bind(this)
 
 	boxEl.addEventListener('mousedown', this.clickHandler);
@@ -65,12 +160,8 @@ function NoteBox(key, onClick) {
 // This will create a map from key strings (i.e. 'c') to NoteBox objects so that
 // clicking the corresponding boxes on the page will play the NoteBox's audio.
 // It will also demonstrate programmatically playing notes by calling play directly.
-var notes = {};
 
-KEYS.forEach(function (key) {
-	notes[key] = new NoteBox(key);
-});
 
-KEYS.concat(KEYS.slice().reverse()).forEach(function(key, i) {
-	setTimeout(notes[key].play.bind(null, key), i * NOTE_DURATION);
-});
+//KEYS.forEach(function(key, i) { // KEYS.concat(KEYS.slice().reverse()).forEach(function(key, i)
+	//setTimeout(notes[key].play.bind(null, key), i * NOTE_DURATION);
+//});
